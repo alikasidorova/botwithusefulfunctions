@@ -48,19 +48,19 @@ random_responses = [
 def start(message):
     user_states[message.chat.id] = STATE_START
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("Температурный режим")
-    item2 = types.KeyboardButton("Калькулятор")
-    item3 = types.KeyboardButton("Волшебный шар с ответами")
-    item4 = types.KeyboardButton("Пёсики")
-    item5 = types.KeyboardButton("Генерирование надежного пароля")
-    item6 = types.KeyboardButton("Открыть Github")
+    item1 = types.KeyboardButton("/weather")
+    item2 = types.KeyboardButton("/calculate")
+    item3 = types.KeyboardButton("/ask")
+    item4 = types.KeyboardButton("/dog")
+    item5 = types.KeyboardButton("/generate_password")
+    item6 = types.KeyboardButton("/website")
     markup.add(item1, item2, item3, item4, item5, item6)
 
     bot.send_message(message.chat.id, f"Привет {message.from_user.first_name} {message.from_user.last_name}! Я бот с разными функциями. Выберите одну из команд ниже:", reply_markup=markup)
 
 @bot.message_handler(commands=['website'])
 def site(message):
-    webbrowser.open('https://github.com/users/alikasidorova/projects/1/views/1')
+    webbrowser.open('https://github.com/alikasidorova/botwithusefulfunctions')
 
 # Обработка команды /calculate
 @bot.message_handler(commands=['calculate'])
