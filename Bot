@@ -1,0 +1,140 @@
+import telebot
+import webbrowser
+import requests
+from telebot import types
+import random
+import string
+
+# Определение состояний и контекста
+STATE_START = "start"
+STATE_WEATHER = "weather"
+STATE_CALCULATE = "calculate"
+STATE_ASK = "ask"
+STATE_DOG = "dog"
+
+BOT_TOKEN = '6705707968:AAGp9YS3AiA5b2GmN9itgcBXCx0pFVUUS0o'    # Токен от бота
+API_KEY_WHEATHER = '368e04236ee260b8cd43130579566b67'   # API от сайта с погодой
+DOG_API_KEY = 'live_DI2GRAdQ3EgG5a3o6TjJnx15u42flLYgasbiucNhEO7KBS0OuP1pvBIwIPfZvTtd'   # API от сайта с песиками
+
+bot = telebot.TeleBot('6705707968:AAGp9YS3AiA5b2GmN9itgcBXCx0pFVUUS0o')
+
+user_states = {}    # Состояния пользователя
+
+# Ответы на вопросы к шару
+random_responses = [
+    "На мой взгляд, да.",
+    "Спросите еще раз позже.",
+    "Лучше не говорить вам сейчас.",
+    "Сейчас не могу предсказать.",
+    "Сосредоточься и спроси еще раз.",
+    "Не рассчитывайте на это.",
+    "Это несомненно.",
+    "Это определенно так.",
+    "Скорее всего.",
+    "Мой ответ - нет.",
+    "Мои источники говорят, что нет.",
+    "Перспективы не очень хорошие.",
+    "Перспективы хорошие.",
+    "Знаки указывают на положительный исход",
+    "Очень сомнительно",
+    "Без сомнения",
+    "Да!",
+    "Да, определенно",
+    "Вы можете положиться на это"
+]
+
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    user_states[message.chat.id] = STATE_START
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item1 = types.KeyboardButton("Температурный режим")
+    item2 = types.KeyboardButton("Калькулятор")
+    item3 = types.KeyboardButton("Волшебный шар с ответами")
+    item4 = types.KeyboardButton("Пёсики")
+    item5 = types.KeyboardButton("Генерирование надежного пароля")
+    item6 = types.KeyboardButton("Открыть Github")
+    markup.add(item1, item2, item3, item4, item5, item6)
+
+    bot.send_message(message.chat.id, f"Привет {message.from_user.first_name} {message.from_user.last_name}! Я бот с разными функциями. Выберите одну из команд ниже:", reply_markup=markup)
+
+@bot.message_handler(commands=['website'])
+def site(message):
+    webbrowser.open('https://github.com/users/alikasidorova/projects/1/views/1')
+
+# Обработка команды /calculate
+@bot.message_handler(commands=['calculate'])
+def calculate(message):
+    user_states[message.chat.id] = STATE_CALCULATE
+    bot.send_message(message.chat.id, "Введите выражение для расчета.")
+
+# Обработка команды /weather
+@bot.message_handler(commands=['weather'])
+def weather(message):
+    user_states[message.chat.id] = STATE_WEATHER
+    bot.send_message(message.chat.id, "Напиши название города.")
+
+# Обработка команды /ask
+@bot.message_handler(commands=['ask'])
+def ask_question(message):
+    user_states[message.chat.id] = STATE_ASK
+    bot.send_message(message.chat.id, "Напиши свой вопрос.")
+
+# Обработка команды /dog
+@bot.message_handler(commands=['dog'])
+def send_random_dog_photo(message):
+    user_states[message.chat.id] = STATE_DOG
+    # Используем API для получения случайной фотографии песика
+    url = f"https://api.thedogapi.com/v1/images/search?api_key={DOG_API_KEY}"
+    response = requests.get(url)
+    data = response.json()
+
+    if data and len(data) > 0:
+        image_url = data[0]["url"]
+        bot.send_photo(message.chat.id, image_url)
+    else:
+        bot.send_message(message.chat.id, "Не удалось получить фотографию песика. Попробуйте позже.")
+
+# Обработка команды /generate_password
+@bot.message_handler(commands=['generate_password'])
+def generate_password(message):
+    # Генерируем пароль длиной 12 символов (вы можете изменить длину по вашему усмотрению)
+    password = generate_strong_password(12)
+
+    # Отправляем сгенерированный пароль пользователю
+    bot.send_message(message.chat.id, f"Сгенерированный надежный пароль: {password}")
+
+
+# Функция для генерации надежного пароля
+def generate_strong_password(length=12):
+    characters = string.ascii_letters + string.digits + string.punctuation
+    length = max(8, length)
+    password = ''.join(random.choice(characters) for _ in range(length))
+    return password
+
+# Обработка выражений
+@bot.message_handler(func=lambda message: message.text and not message.text.startswith('/'))
+def calculate_expression(message):
+    if user_states.get(message.chat.id) == STATE_CALCULATE:
+        expression = message.text
+        try:
+            result = eval(expression)
+            bot.send_message(message.chat.id, f"Результат: {result}")
+        except Exception:
+            bot.send_message(message.chat.id, "Неверное выражение. Пожалуйста, попробуйте снова.")
+    if user_states.get(message.chat.id) == STATE_WEATHER:
+        city = message.text.strip().lower()
+        res = requests.get(f'http://api.openweathermap.org/geo/1.0/direct?q="{city}"&limit=1&appid={API_KEY_WHEATHER}')
+        lat = res.json()[0]["lat"]
+        lon = res.json()[0]["lon"]
+        res = requests.get(f'https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=1&latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min')
+        max_temp = res.json()["daily"]["temperature_2m_max"][0]
+        min_temp = res.json()["daily"]["temperature_2m_min"][0]
+        bot.reply_to(message, f'Температура на сегодня составит от {round(min_temp)} до {round(max_temp)}.')
+    if user_states[message.chat.id] == STATE_ASK:
+        random_response = random.choice(random_responses)
+        bot.send_message(message.chat.id, random_response)
+
+
+if __name__ == "__main__":
+    bot.polling(none_stop=True)
