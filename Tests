@@ -1,0 +1,39 @@
+# Тесты для калькулятора 
+
+import pytest
+from botwithusefulfunctions import calculate_expression
+
+def test_calculate_expression():
+    assert calculate_expression("2 + 2") == 4
+    assert calculate_expression("3 * 5") == 15
+    assert calculate_expression("10 / 2") == 5
+    assert calculate_expression("10 / 0") == "Error"
+
+
+# Тесты для функции генерации надежного пароля
+import pytest
+from botwithusefulfunctions import generate_strong_password
+
+def test_generate_strong_password():
+    password = generate_strong_password(12)
+    assert len(password) == 12
+    password = generate_strong_password(8)
+    assert len(password) == 8
+
+
+# Тесты для ответов шара с предсказаниями
+import pytest
+from botwithusefulfunctions import random_responses
+
+def test_random_responses():
+    for _ in range(10):
+        response = random_responses()
+        assert isinstance(response, str)
+
+
+# Тесты для ответов функции пёсики заключается нескольких прожиманиях кнопки "Пёсики" (/dog) 
+
+
+
+
+
