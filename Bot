@@ -12,7 +12,7 @@ STATE_CALCULATE = "calculate"
 STATE_ASK = "ask"
 STATE_DOG = "dog"
 
-BOT_TOKEN = '6705707968:AAGp9YS3AiA5b2GmN9itgcBXCx0pFVUUS0o'    # Токен от бота
+BOT_TOKEN = ' '    # Токен от бота (находится у меня)
 API_KEY_WHEATHER = '368e04236ee260b8cd43130579566b67'   # API от сайта с погодой
 DOG_API_KEY = 'live_DI2GRAdQ3EgG5a3o6TjJnx15u42flLYgasbiucNhEO7KBS0OuP1pvBIwIPfZvTtd'   # API от сайта с песиками
 
